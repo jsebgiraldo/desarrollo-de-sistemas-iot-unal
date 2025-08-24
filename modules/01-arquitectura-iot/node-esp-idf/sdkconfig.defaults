@@ -1,0 +1,14 @@
+# Target ESP32 for QEMU (xtensa)
+CONFIG_IDF_TARGET="esp32"
+
+# Networking / MQTT
+CONFIG_MBEDTLS_TLS_CLIENT=y
+CONFIG_LWIP_IPV6=y
+CONFIG_MQTT_PROTOCOL_311=y
+
+# App defaults: Ethernet in QEMU image
+CONFIG_APP_USE_ETHERNET=y
+
+# Wi-Fi can be disabled by default for QEMU
+CONFIG_ESP_WIFI_ENABLE_WPA3_SAE=y
+CONFIG_WIFI_PROV_SCAN_MAX_ENTRIES=16

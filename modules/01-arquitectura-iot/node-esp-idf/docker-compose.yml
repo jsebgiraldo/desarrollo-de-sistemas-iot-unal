@@ -1,0 +1,34 @@
+services:
+  esp-idf:
+    image: iot-idf:latest
+    container_name: esp-idf-dev
+    volumes:
+      - ./:/workspace
+    working_dir: /workspace
+    tty: true
+    networks:
+      - tbnet
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  esp-idf-run:
+    build: .
+    image: iot-idf:latest
+    container_name: esp-idf-run
+    environment:
+      TB_HOST: ${TB_HOST:-tb}
+      TB_PORT: ${TB_PORT:-1883}
+      TB_TOKEN: ${TB_TOKEN:-}
+      QEMU_FLASH_MB: 4
+    volumes:
+      - ./:/workspace
+    working_dir: /workspace
+    command: ["/bin/bash", "-lc", "chmod +x tools/run_qemu_bridge.sh && exec tools/run_qemu_bridge.sh"]
+    networks:
+      - tbnet
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  tbnet:
+    name: tbnet

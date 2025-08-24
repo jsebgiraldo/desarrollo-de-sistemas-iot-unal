@@ -1,0 +1,10 @@
+menu "App Options"
+
+config APP_USE_ETHERNET
+    bool "Use Ethernet (QEMU) instead of Wi‑Fi"
+    default y
+    help
+        Enable Ethernet stack (esp_eth) for running under QEMU with open_eth.
+        Disable to use Wi‑Fi STA when running on real hardware.
+
+endmenu

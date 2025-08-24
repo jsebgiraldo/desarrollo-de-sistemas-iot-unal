@@ -37,6 +37,45 @@ docker compose run --rm esp-idf bash -lc "xtensa-esp32-elf-gdb build/tb_thread_n
 - Flashea y monitorea con ESP-IDF en tu host
 
 ## Troubleshooting
+## Ejecutar 2 nodos (dos consolas)
+
+Comparten el mismo código/imagen, pero usan tokens y directorios de build distintos:
+
+- Consola A:
+```
+TB_TOKEN=<TOKEN_A> BUILD_DIR=build_a docker compose up esp-idf-run
+```
+
+- Consola B (primero compila, luego puedes usar SKIP_BUILD=1 en relanzos):
+```
+TB_TOKEN=<TOKEN_B> BUILD_DIR=build_b docker compose up esp-idf-run
+# Re-lanzar más rápido:
+# TB_TOKEN=<TOKEN_B> BUILD_DIR=build_b SKIP_BUILD=1 docker compose up esp-idf-run
+```
+
+Tips:
+- Ambas instancias pueden apuntar a `TB_HOST=tb` si comparten la red docker con ThingsBoard; si no, usa `host.docker.internal`.
+- Puedes parametrizar `QEMU_FLASH_MB` por instancia si quieres aislar memoria/flash.
+
+Alternativa (aislar contenedores con proyectos -p):
+
+- Consola A:
+```
+docker compose build esp-idf-run
+TB_TOKEN=<TOKEN_A> BUILD_DIR=build_a docker compose -p nodeA up esp-idf-run
+```
+
+- Consola B:
+```
+TB_TOKEN=<TOKEN_B> BUILD_DIR=build_b docker compose -p nodeB up esp-idf-run
+```
+
+Alternativa efímera (compose run con nombres):
+```
+TB_TOKEN=<TOKEN_A> BUILD_DIR=build_a docker compose run --rm --name esp32-node-a esp-idf-run
+TB_TOKEN=<TOKEN_B> BUILD_DIR=build_b docker compose run --rm --name esp32-node-b esp-idf-run
+```
+
 
 - QEMU: "unsupported machine type: 'esp32'"
 	- Asegúrate de usar esta imagen (compila QEMU de Espressif). Reconstruye sin caché:

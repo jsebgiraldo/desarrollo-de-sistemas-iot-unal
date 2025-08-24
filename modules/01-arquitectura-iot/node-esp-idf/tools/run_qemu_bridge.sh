@@ -3,8 +3,15 @@ set -euo pipefail
 
 # 1) Cargar entorno ESP-IDF y compilar (Xtensa ESP32)
 . /opt/esp/idf/export.sh
-idf.py set-target esp32
-idf.py build
+
+# Permitir múltiples instancias aislando el directorio de build
+BUILD_DIR=${BUILD_DIR:-build}
+if [ "${SKIP_BUILD:-0}" != "1" ]; then
+  idf.py -B "$BUILD_DIR" set-target esp32
+  idf.py -B "$BUILD_DIR" build
+else
+  echo "[run] SKIP_BUILD=1: usando artefactos existentes en '$BUILD_DIR'"
+fi
 
 # 2) Venv para el bridge e instalación de deps
 if [ ! -d /opt/pytools ]; then
@@ -25,15 +32,15 @@ fi
 
 QEMU_OPTS=( -nographic -M esp32 )
 if [ "$DEBUG_FLAG" = "1" ]; then
-  echo "[run] QEMU en modo debug: esperando GDB en :1234 (usa: xtensa-esp32-elf-gdb build/tb_thread_node.elf -ex 'target remote :1234')"
+  echo "[run] QEMU en modo debug: esperando GDB en :1234 (usa: xtensa-esp32-elf-gdb $BUILD_DIR/tb_thread_node.elf -ex 'target remote :1234')"
   QEMU_OPTS+=( -S -s )
 fi
 
 # Construir imagen de SPI flash al estilo flash.sh (dd) y arrancar desde ella
-BOOT=build/bootloader/bootloader.bin
-PART=build/partition_table/partition-table.bin
-APPBIN=build/tb_thread_node.bin
-FLASHIMG=build/flash.bin
+BOOT="$BUILD_DIR/bootloader/bootloader.bin"
+PART="$BUILD_DIR/partition_table/partition-table.bin"
+APPBIN="$BUILD_DIR/tb_thread_node.bin"
+FLASHIMG="$BUILD_DIR/flash.bin"
 
 FLASH_MB=${QEMU_FLASH_MB:-4}
 case "$FLASH_MB" in
@@ -57,5 +64,5 @@ if [ -f "$BOOT" ] && [ -f "$PART" ] && [ -f "$APPBIN" ]; then
   exec qemu-system-xtensa "${QEMU_OPTS[@]}" -drive file="$FLASHIMG",if=mtd,format=raw | python3 tools/bridge.py
 else
   echo "[run] Archivos de bootloader/particiones/app no encontrados; usando -kernel ELF"
-  exec qemu-system-xtensa "${QEMU_OPTS[@]}" -kernel build/tb_thread_node.elf | python3 tools/bridge.py
+  exec qemu-system-xtensa "${QEMU_OPTS[@]}" -kernel "$BUILD_DIR/tb_thread_node.elf" | python3 tools/bridge.py
 fi

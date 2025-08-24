@@ -22,7 +22,7 @@ Nota: no se requieren tareas de VS Code; ejecuta todo desde la consola siguiendo
 ## Flujo del demo
 1. Levantar ThingsBoard CE en local con Docker.
 2. Registrar un dispositivo (ESP32) y obtener su token de acceso.
-3. Compilar el nodo ESP-IDF y ejecutar en QEMU (bridge) para validar lógica.
+3. Compilar el nodo ESP-IDF y ejecutar en QEMU (bridge) para validar lógica. Puedes correr dos nodos simultáneamente con diferentes tokens (ver sección en `node-esp-idf/README.md`).
 4. Opcional: Gateway lee múltiples nodos (o simula nodos), agrega datos y publica a ThingsBoard.
 5. Crear dashboard en ThingsBoard para visualizar datos y reglas simples.
 

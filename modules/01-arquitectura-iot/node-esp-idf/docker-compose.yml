@@ -1,7 +1,6 @@
 services:
   esp-idf:
     image: iot-idf:latest
-    container_name: esp-idf-dev
     volumes:
       - ./:/workspace
     working_dir: /workspace
@@ -14,7 +13,6 @@ services:
   esp-idf-run:
     build: .
     image: iot-idf:latest
-    container_name: esp-idf-run
     environment:
       TB_HOST: ${TB_HOST:-tb}
       TB_PORT: ${TB_PORT:-1883}

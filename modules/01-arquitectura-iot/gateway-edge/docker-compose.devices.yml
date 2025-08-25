@@ -1,0 +1,63 @@
+services:
+  sim-node-1:
+    image: alpine:3.19
+    container_name: sim-node-1
+    restart: unless-stopped
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        set -e
+        echo "sim-node-1 starting"
+        apk add --no-cache mosquitto-clients coreutils >/dev/null 2>&1 || true
+        # Esperar broker (host:1884)
+        until mosquitto_pub -h host.docker.internal -p 1884 -t sensor/health -m "ready" >/dev/null 2>&1; do
+          echo "waiting mosquitto..."; sleep 1; done
+        # Conectar como en node-3 (request root): sensor/connect con payload
+        mosquitto_pub -h host.docker.internal -p 1884 -t sensor/connect -m '{"serialNumber":"sim-node-1"}' || true
+        echo "sim-node-1 connected"
+        # Telemetría periódica (root mapping): sensor/data con campo device
+        while true; do
+          TS=$$(date +%s%3N 2>/dev/null || echo "$$(( $$(date +%s) * 1000 ))")
+          T=$$(awk 'BEGIN{srand(); printf "%.2f", 20+rand()*10}')
+          H=$$(awk 'BEGIN{srand(); printf "%.2f", 40+rand()*20}')
+          printf '{"device":"sim-node-1","temperature": %s, "humidity": %s}' "$$T" "$$H" \
+            | mosquitto_pub -s -h host.docker.internal -p 1884 -t sensor/data
+          sleep 1
+        done
+    networks:
+      - edgenet
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  sim-node-2:
+    image: alpine:3.19
+    container_name: sim-node-2
+    restart: unless-stopped
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        set -e
+        echo "sim-node-2 starting"
+        apk add --no-cache mosquitto-clients coreutils >/dev/null 2>&1 || true
+        until mosquitto_pub -h host.docker.internal -p 1884 -t sensor/health -m "ready" >/dev/null 2>&1; do
+          echo "waiting mosquitto..."; sleep 1; done
+        mosquitto_pub -h host.docker.internal -p 1884 -t sensor/connect -m '{"serialNumber":"sim-node-2"}' || true
+        echo "sim-node-2 connected"
+        while true; do
+          T=$$(awk 'BEGIN{srand(); printf "%.2f", 20+rand()*10}')
+          H=$$(awk 'BEGIN{srand(); printf "%.2f", 40+rand()*20}')
+          printf '{"device":"sim-node-2","temperature": %s, "humidity": %s}' "$$T" "$$H" \
+            | mosquitto_pub -s -h host.docker.internal -p 1884 -t sensor/data
+          sleep 1
+        done
+    networks:
+      - edgenet
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  edgenet:
+    external: true
+    name: edge-net

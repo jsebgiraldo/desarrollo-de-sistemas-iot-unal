@@ -1,30 +1,69 @@
-# Módulo 01: Arquitectura IoT
+# Módulo 01: Arquitectura IoT (Gateway + Mosquitto + ThingsBoard)
 
-Este módulo demuestra una arquitectura IoT completa:
-- Nodo (ESP32 con ESP-IDF) publicando telemetría.
-- QEMU para simulación de firmware sin hardware, usando un bridge MQTT.
-- Gateway/Edge (opcional) para agregación/procesamiento local.
-- Servidor IoT (ThingsBoard) para ingesta, visualización y reglas.
+Arquitectura de referencia para el curso: dispositivos publican a un broker local (Mosquitto), el Gateway oficial de ThingsBoard consume esos tópicos y reenvía como child devices al servidor ThingsBoard.
 
-## Estructura
-- `node-esp-idf/`: ejemplo con ESP-IDF (ESP32), Docker y QEMU + bridge.
-- `gateway-edge/`: servicio Python para actuar como gateway (opcional).
-- `cloud-thingsboard/`: despliegue local con Docker de ThingsBoard CE.
-- `docs/`: documentación guiada del laboratorio.
+## Componentes
+- `cloud-thingsboard/`: ThingsBoard CE en Docker (UI en http://localhost:8080).
+- `gateway-edge/`: 
+	- `docker-compose.tbgw.yml`: Gateway oficial (thingsboard/tb-gateway).
+	- `docker-compose.external.yml`: Mosquitto (broker de borde) y gateway Python opcional (legacy).
+	- `docker-compose.devices.yml`: simuladores MQTT.
+- `node-esp-idf/` (opcional): ESP32/QEMU publicando directo a ThingsBoard (sin gateway).
+- `docs/`: guía de laboratorio.
 
-## Requisitos generales
-- Docker y Docker Compose (para ThingsBoard y entorno ESP-IDF).
-- Python 3.10+ (para scripts de gateway y utilidades).
-- Node.js 18+ (opcional para Node-RED u otros clientes).
+## Requisitos
+- Docker y Docker Compose.
+- Token de un dispositivo Gateway creado en ThingsBoard.
 
-Nota: no se requieren tareas de VS Code; ejecuta todo desde la consola siguiendo los README.
+## Pasos del laboratorio (reproducibles)
+1) Levantar ThingsBoard
+```
+cd cloud-thingsboard
+docker compose up -d
+```
+2) Levantar Mosquitto (broker edge)
+```
+cd ../gateway-edge
+docker compose -f docker-compose.external.yml up -d mosquitto
+```
+3) Levantar Gateway oficial
+```
+docker compose -f docker-compose.tbgw.yml up -d
+```
+En el UI del Gateway (ThingsBoard → tu Gateway → Connectors → MQTT):
+- Host: 127.0.0.1
+- Port: 1884
+- MQTT version: 5
+- Client ID: ThingsBoard_gateway
+- Security: Anonymous
 
-## Flujo del demo
-1. Levantar ThingsBoard CE en local con Docker.
-2. Registrar un dispositivo (ESP32) y obtener su token de acceso.
-3. Compilar el nodo ESP-IDF y ejecutar en QEMU (bridge) para validar lógica. Puedes correr dos nodos simultáneamente con diferentes tokens (ver sección en `node-esp-idf/README.md`).
-4. Opcional: Gateway lee múltiples nodos (o simula nodos), agrega datos y publica a ThingsBoard.
-5. Crear dashboard en ThingsBoard para visualizar datos y reglas simples.
+4) Arrancar simuladores
+```
+docker compose -f docker-compose.devices.yml up -d
+```
+Publican:
+- Conexión: `sensor/connect` con `{"serialNumber":"sim-node-1"}` y `sim-node-2`.
+- Telemetría: `sensor/data` con `{"device":"sim-node-1|2","temperature":..,"humidity":..}`.
 
-## Cómo usar
-Sigue las guías en cada subcarpeta y en `docs/01-arquitectura-iot`.
+5) Verificar en ThingsBoard
+- En tu dispositivo Gateway → pestaña Child devices: aparecen sim-node-1 y sim-node-2.
+- Latest telemetry muestra temperature y humidity.
+
+## Variante: ESP32/QEMU (opcional)
+Sigue `node-esp-idf/README.md` para publicar directo a ThingsBoard con token de dispositivo.
+
+## Limpieza
+```
+docker compose -f docker-compose.devices.yml down
+docker compose -f docker-compose.tbgw.yml down
+docker compose -f docker-compose.external.yml down
+cd ../cloud-thingsboard && docker compose down -v
+```
+
+## Troubleshooting
+- Gateway no ve a Mosquitto:
+	- Si configuraste Host=127.0.0.1 y el gateway está en contenedor, 127.0.0.1 apunta al contenedor. Usa 127.0.0.1:1884 (puerto expuesto del host) o configura por archivo a `mosquitto:1883`.
+- Dispositivos no aparecen:
+	- Asegura que publican a `sensor/connect` y `sensor/data` con el `device` correcto.
+- Token inválido del Gateway:
+	- Ver logs del gateway y confirmar token del dispositivo de tipo Gateway.

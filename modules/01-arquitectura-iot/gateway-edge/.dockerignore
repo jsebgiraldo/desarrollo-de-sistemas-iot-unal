@@ -1,0 +1,12 @@
+# Ignore local dev artifacts
+.venv/
+__pycache__/
+*.pyc
+*.log
+
+# Build output
+build/
+
+# VCS
+.git/
+.gitignore

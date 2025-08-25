@@ -18,7 +18,16 @@ Objetivo: levantar ThingsBoard local, ejecutar el nodo ESP-IDF en QEMU con puent
 
 ## 3) Gateway (opcional)
 - Instala deps: en `gateway-edge`: `python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt`
-- Ejecuta: `TB_HOST=localhost TB_PORT=1883 TB_TOKEN=<token_gateway> python3 src/gateway.py`
+- Ejecuta (con hijos por archivo o env):
+  - Archivo: edita `modules/01-arquitectura-iot/gateway-edge/devices.json` y luego:
+    `TB_HOST=localhost TB_PORT=1883 TB_TOKEN=<token_gateway> GW_CHILDREN_FILE=./devices.json python3 src/gateway.py`
+  - Env: `TB_HOST=localhost TB_PORT=1883 TB_TOKEN=<token_gateway> GW_CHILDREN="node-1,node-2" python3 src/gateway.py`
+  - Observa en TB → Gateway → Child devices cómo aparecen y envían telemetría.
+
+### ¿Por qué gateway?
+- Permite agregar múltiples nodos y publicar a TB con un único canal seguro.
+- Realiza cómputo en el borde (filtrar, comprimir, validar) y reduce el tráfico.
+- Aísla protocolos locales (BLE/Zigbee/Modbus) y ofrece un contrato MQTT estable a la nube.
 
 Notas
 - Depuración: `DEBUG=1 TB_TOKEN=<token> docker compose up esp-idf-run` y adjunta GDB (`xtensa-esp32-elf-gdb build/tb_thread_node.elf -ex 'target remote :1234'`).

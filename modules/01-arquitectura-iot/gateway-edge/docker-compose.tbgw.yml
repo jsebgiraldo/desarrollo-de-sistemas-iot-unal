@@ -1,0 +1,22 @@
+services:
+  tb-iot-gateway:
+    image: thingsboard/tb-gateway:latest
+    container_name: tb-iot-gateway
+    restart: unless-stopped
+    volumes:
+      - ./tbgw-config:/thingsboard_gateway/config
+    environment:
+      TZ: UTC
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - tbnet
+      - edgenet
+
+networks:
+  tbnet:
+    external: true
+    name: cloud-thingsboard_tbnet
+  edgenet:
+    external: true
+    name: edge-net

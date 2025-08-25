@@ -150,7 +150,7 @@ static void mqtt_app_start(void) {
 
         // Puente por stdout para QEMU
         printf("TBTELEMETRY:%s\n", payload);
-        vTaskDelay(pdMS_TO_TICKS(5000));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 

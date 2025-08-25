@@ -16,5 +16,10 @@ Notas:
   platform: linux/amd64
   ```
   bajo el servicio `tb` en el compose.
-- La red `tbnet` permite que otros contenedores accedan por host `tb`. Si ejecutas desde otro stack, usa `host.docker.internal` como host.
+- La red `tbnet` permite que otros contenedores accedan por host `tb`. Si ejecutas servicios en otra carpeta/compose, únelos a `cloud-thingsboard_tbnet` o usa `host.docker.internal` como host.
+
+## Limpieza
+```
+docker compose down -v
+```
 

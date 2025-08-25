@@ -1,1 +1,4 @@
 paho-mqtt>=1.6,<2.0
+tb-mqtt-client>=1.4,<2.0
+setuptools>=65
+mmh3>=4

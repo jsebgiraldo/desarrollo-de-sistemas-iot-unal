@@ -10,6 +10,7 @@ Arquitectura de referencia para el curso: dispositivos publican a un broker loca
 	- `docker-compose.devices.yml`: simuladores MQTT.
 - `node-esp-idf/` (opcional): ESP32/QEMU publicando directo a ThingsBoard (sin gateway).
 - `docs/`: guía de laboratorio.
+ - `practica-01/`: guía integrada y reproducible para la práctica 01.
 
 ## Requisitos
 - Docker y Docker Compose.

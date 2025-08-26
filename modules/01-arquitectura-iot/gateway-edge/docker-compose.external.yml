@@ -10,29 +10,6 @@ services:
       - tbnet      # para que el gateway pueda resolverlo desde TB net
       - edgenet    # red de borde para devices locales
 
-  gateway:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: tb-gateway
-    environment:
-      TB_HOST: tb             # nombre del servicio ThingsBoard en la otra compose
-      TB_PORT: 1883
-      TB_TOKEN: ${TB_TOKEN:-9YQfeQcVaKRTUm6EVz6S}
-      GW_CHILDREN_FILE: /app/devices.json
-      GW_PERIOD_SEC: 5
-      GW_SIMULATE_CHILDREN: "false"
-      CONNECTOR_MQTT_ENABLE: "true"
-      CONNECTOR_MQTT_HOST: mosquitto
-      CONNECTOR_MQTT_PORT: 1883
-      CONNECTOR_TOPIC_PREFIX: devices
-      CONNECTOR_TOPIC_PREFIX_ALT: sensor
-    volumes:
-      - ./devices.json:/app/devices.json:ro
-    networks:
-      - tbnet     # acceso a ThingsBoard
-      - edgenet   # acceso al broker local y devices
-
 networks:
   tbnet:
     external: true

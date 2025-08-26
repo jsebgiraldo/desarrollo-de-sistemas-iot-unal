@@ -4,6 +4,7 @@ Repositorio del curso de Desarrollo de Sistemas IoT (UNAL). Incluye un demo comp
 
 ## Módulos
 - `modules/01-arquitectura-iot/`: Arquitectura IoT (Gateway + Mosquitto + Simuladores + ThingsBoard). También incluye un ejemplo opcional con ESP32/QEMU.
+	- Práctica integrada: `modules/01-arquitectura-iot/practica-01/`
 
 ## Documentación
 - Guías paso a paso en `docs/`.

@@ -1,0 +1,16 @@
+{
+  "sim-node-1": {
+    "connectorId": "cd6d6242-7e57-4088-a234-c405e15ece28",
+    "connectorName": "MQTT-CONN",
+    "deviceType": "Thermometer",
+    "disconnected": false,
+    "renaming": null
+  },
+  "sim-node-2": {
+    "connectorId": "cd6d6242-7e57-4088-a234-c405e15ece28",
+    "connectorName": "MQTT-CONN",
+    "deviceType": "Thermometer",
+    "disconnected": false,
+    "renaming": null
+  }
+}

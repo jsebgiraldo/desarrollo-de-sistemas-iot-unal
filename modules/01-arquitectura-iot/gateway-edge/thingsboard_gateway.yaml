@@ -1,0 +1,17 @@
+# Configuración principal para ThingsBoard Gateway
+# Documentación: https://thingsboard.io/docs/iot-gateway/config/
+
+thingsboard:
+  host: tb
+  port: 1883
+  remoteConfiguration: false
+  security:
+    accessToken: "TX8hii6Q43b4LMlpeRXA"
+
+storage:
+  type: memory
+
+connectors:
+  - name: MQTT Broker Connector
+    type: mqtt
+    configuration: mqtt.json
